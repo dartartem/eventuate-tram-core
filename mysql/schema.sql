@@ -3,16 +3,19 @@ USE eventuate;
 DROP Table IF Exists message;
 
 CREATE TABLE message (
-  ID VARCHAR(1000) PRIMARY KEY,
-  DESTINATION VARCHAR(1000) NOT NULL,
-  HEADERS VARCHAR(1000) NOT NULL,
-  PAYLOAD VARCHAR(1000) NOT NULL
+  id VARCHAR(1000) PRIMARY KEY,
+  destination VARCHAR(1000) NOT NULL,
+  headers VARCHAR(1000) NOT NULL,
+  payload VARCHAR(1000) NOT NULL,
+  published SMALLINT DEFAULT 0
 );
 
+CREATE INDEX message_published_idx ON message(published, id);
+
 CREATE TABLE received_messages (
-  CONSUMER_ID VARCHAR(1000),
-  MESSAGE_ID VARCHAR(1000),
-  PRIMARY KEY(CONSUMER_ID, MESSAGE_ID)
+  consumer_id VARCHAR(1000),
+  message_id VARCHAR(1000),
+  PRIMARY KEY(consumer_id, message_id)
 );
 
 CREATE TABLE aggregate_instance_subscriptions(
