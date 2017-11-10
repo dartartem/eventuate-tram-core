@@ -37,7 +37,7 @@ public class TramCommandsAndEventsIntegrationTest {
             new MyTestCommand(),
             Collections.emptyMap());
 
-    Message m = myReplyConsumer.messages.poll(5, TimeUnit.SECONDS);
+    Message m = myReplyConsumer.messages.poll(15, TimeUnit.SECONDS);
 
     assertNotNull(m);
 
