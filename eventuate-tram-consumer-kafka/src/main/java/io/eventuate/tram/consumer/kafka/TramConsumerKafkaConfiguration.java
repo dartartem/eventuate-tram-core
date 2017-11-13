@@ -12,7 +12,7 @@ import java.util.Optional;
 @EnableConfigurationProperties(EventuateKafkaConfigurationProperties.class)
 public class TramConsumerKafkaConfiguration {
 
-  @Value("${eventuateLocal.cdc.eventuate.database:#{null}}")
+  @Value("${eventuateLocal.cdc.eventuate.database:#{\"eventuate\"}}")
   private String eventuateDatabase;
 
   @Bean
@@ -22,6 +22,6 @@ public class TramConsumerKafkaConfiguration {
 
   @Bean
   public DuplicateMessageDetector duplicateMessageDetector() {
-    return new DuplicateMessageDetector(Optional.ofNullable(eventuateDatabase));
+    return new DuplicateMessageDetector(eventuateDatabase);
   }
 }

@@ -11,15 +11,15 @@ public class DuplicateMessageDetector {
   @Autowired
   private JdbcTemplate jdbcTemplate;
 
-  private Optional<String> database;
+  private String database;
 
-  public DuplicateMessageDetector(Optional<String> database) {
+  public DuplicateMessageDetector(String database) {
     this.database = database;
   }
 
   public boolean isDuplicate(String consumerId, String messageId) {
     try {
-      jdbcTemplate.update(String.format("insert into %s(consumer_id, message_id) values(?, ?)", database.map(db -> db + ".").orElse("") + "received_messages"),
+      jdbcTemplate.update(String.format("insert into %s(consumer_id, message_id) values(?, ?)", database + ".received_messages"),
               consumerId, messageId);
       return false;
     } catch (DuplicateKeyException e) {
