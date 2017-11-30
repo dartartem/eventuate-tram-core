@@ -7,6 +7,7 @@ dependencies {
         testCompile project(":eventuate-tram-cdc-mysql-connector-autoconfigure")
     }
 
+    testCompile project(":eventuate-tram-test-util")
     testCompile "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
     testCompile "io.eventuate.local.java:eventuate-local-java-test-util:$eventuateLocalVersion"
 
