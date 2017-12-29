@@ -5,5 +5,6 @@ dependencies {
     compile project(":eventuate-tram-commands")
 
     compile "io.eventuate.util:eventuate-util-test:$eventuateUtilVersion"
+    compile "io.eventuate.local.java:eventuate-local-java-test-util:$eventuateLocalVersion"
     compile "junit:junit:4.12"
 }

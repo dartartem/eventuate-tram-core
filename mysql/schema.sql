@@ -18,4 +18,3 @@ CREATE TABLE received_messages (
   message_id VARCHAR(767),
   PRIMARY KEY(consumer_id, message_id)
 );
-

@@ -1,5 +1,6 @@
 package io.eventuate.tram.commandsandevents.integrationtests;
 
+import io.eventuate.local.testutil.SqlScriptEditor;
 import io.eventuate.tram.commands.common.ChannelMapping;
 import io.eventuate.tram.commands.common.DefaultChannelMapping;
 import io.eventuate.tram.commands.consumer.CommandDispatcher;
@@ -7,10 +8,12 @@ import io.eventuate.tram.commands.producer.TramCommandProducerConfiguration;
 import io.eventuate.tram.consumer.kafka.TramConsumerKafkaConfiguration;
 import io.eventuate.tram.messaging.consumer.MessageConsumer;
 import io.eventuate.tram.messaging.producer.jdbc.TramMessageProducerJdbcConfiguration;
+import io.eventuate.tram.testutil.CustomDBSqlEditor;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
 import static org.mockito.Mockito.spy;
 
@@ -53,6 +56,12 @@ public class TramCommandsAndEventsIntegrationTestConfiguration {
   @Bean
   public MyReplyConsumer myReplyConsumer(MessageConsumer messageConsumer) {
     return new MyReplyConsumer(messageConsumer, "ReplyTo");
+  }
+
+  @Bean
+  @Primary
+  public SqlScriptEditor customDBSqlEditor() {
+    return new CustomDBSqlEditor();
   }
 
 //  @Bean
