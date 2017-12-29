@@ -14,6 +14,11 @@ apply plugin: 'spring-boot'
 dependencies {
     compile "org.springframework.boot:spring-boot-starter-actuator:$springBootVersion"
     compile "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
+
+    compile ('org.postgresql:postgresql:42.1.4') {
+        exclude group: "org.slf4j", module: "slf4j-simple"
+    }
+
     compile project(":eventuate-tram-cdc-mysql-connector")
 }
 
