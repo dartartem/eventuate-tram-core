@@ -2,6 +2,7 @@ package io.eventuate.tram.consumer.kafka;
 
 import io.eventuate.javaclient.commonimpl.JSonMapper;
 import io.eventuate.local.java.kafka.consumer.EventuateKafkaConsumer;
+import io.eventuate.local.java.kafka.consumer.EventuateKafkaConsumerConfigurationProperties;
 import io.eventuate.tram.messaging.common.Message;
 import io.eventuate.tram.messaging.common.MessageImpl;
 import io.eventuate.tram.messaging.consumer.MessageConsumer;
@@ -34,6 +35,9 @@ public class MessageConsumerKafkaImpl implements MessageConsumer {
   @Autowired
   private DuplicateMessageDetector duplicateMessageDetector;
 
+  @Autowired
+  private EventuateKafkaConsumerConfigurationProperties eventuateKafkaConsumerConfigurationProperties;
+
   @Override
   public void subscribe(String subscriberId, Set<String> channels, MessageHandler handler) {
     BiConsumer<ConsumerRecord<String, String>, BiConsumer<Void, Throwable>> kcHandler = (record, callback) -> {
@@ -62,7 +66,12 @@ public class MessageConsumerKafkaImpl implements MessageConsumer {
       });
     };
 
-    EventuateKafkaConsumer kc = new EventuateKafkaConsumer(subscriberId, kcHandler, new ArrayList<>(channels), bootstrapServers);
+    EventuateKafkaConsumer kc = new EventuateKafkaConsumer(subscriberId,
+            kcHandler,
+            new ArrayList<>(channels),
+            bootstrapServers,
+            eventuateKafkaConsumerConfigurationProperties);
+
     consumers.add(kc);
     kc.start();
   }

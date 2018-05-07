@@ -5,7 +5,9 @@ import io.eventuate.javaclient.spring.jdbc.EventuateSchema;
 import io.eventuate.local.common.*;
 import io.eventuate.local.db.log.common.*;
 import io.eventuate.local.java.kafka.EventuateKafkaConfigurationProperties;
+import io.eventuate.local.java.kafka.consumer.EventuateKafkaConsumerConfigurationProperties;
 import io.eventuate.local.java.kafka.producer.EventuateKafkaProducer;
+import io.eventuate.local.java.kafka.producer.EventuateKafkaProducerConfigurationProperties;
 import io.eventuate.local.mysql.binlog.*;
 import io.eventuate.local.polling.PollingCdcKafkaPublisher;
 import io.eventuate.local.polling.PollingCdcProcessor;
@@ -18,12 +20,15 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.*;
 
 import javax.sql.DataSource;
 
 @Configuration
 @Import(EventuateDriverConfiguration.class)
+@EnableConfigurationProperties({EventuateKafkaConsumerConfigurationProperties.class,
+        EventuateKafkaProducerConfigurationProperties.class})
 public class MessageTableChangesToDestinationsConfiguration {
 
   @Bean
@@ -74,8 +79,10 @@ public class MessageTableChangesToDestinationsConfiguration {
   }
 
   @Bean
-  public EventuateKafkaProducer eventuateKafkaProducer(EventuateKafkaConfigurationProperties eventuateKafkaConfigurationProperties) {
-    return new EventuateKafkaProducer(eventuateKafkaConfigurationProperties.getBootstrapServers());
+  public EventuateKafkaProducer eventuateKafkaProducer(EventuateKafkaConfigurationProperties eventuateKafkaConfigurationProperties,
+                                                       EventuateKafkaProducerConfigurationProperties eventuateKafkaProducerConfigurationProperties) {
+    return new EventuateKafkaProducer(eventuateKafkaConfigurationProperties.getBootstrapServers(),
+            eventuateKafkaProducerConfigurationProperties);
   }
 
   @Bean
@@ -86,9 +93,12 @@ public class MessageTableChangesToDestinationsConfiguration {
   @Bean
   @Conditional(MySqlBinlogCondition.class)
   public DebeziumBinlogOffsetKafkaStore debeziumBinlogOffsetKafkaStore(EventuateConfigurationProperties eventuateConfigurationProperties,
-          EventuateKafkaConfigurationProperties eventuateKafkaConfigurationProperties) {
+                                                                       EventuateKafkaConfigurationProperties eventuateKafkaConfigurationProperties,
+                                                                       EventuateKafkaConsumerConfigurationProperties eventuateKafkaConsumerConfigurationProperties) {
 
-    return new DebeziumBinlogOffsetKafkaStore(eventuateConfigurationProperties.getOldDbHistoryTopicName(), eventuateKafkaConfigurationProperties);
+    return new DebeziumBinlogOffsetKafkaStore(eventuateConfigurationProperties.getOldDbHistoryTopicName(),
+            eventuateKafkaConfigurationProperties,
+            eventuateKafkaConsumerConfigurationProperties);
   }
 
 
@@ -110,11 +120,15 @@ public class MessageTableChangesToDestinationsConfiguration {
   @Profile("!EventuatePolling")
   public CdcKafkaPublisher<MessageWithDestination> cdcKafkaPublisher(EventuateKafkaConfigurationProperties eventuateKafkaConfigurationProperties,
                                                                      DatabaseOffsetKafkaStore databaseOffsetKafkaStore,
-                                                                     PublishingStrategy<MessageWithDestination> publishingStrategy) {
+                                                                     PublishingStrategy<MessageWithDestination> publishingStrategy,
+                                                                     EventuateKafkaProducerConfigurationProperties eventuateKafkaProducerConfigurationProperties,
+                                                                     EventuateKafkaConsumerConfigurationProperties eventuateKafkaConsumerConfigurationProperties) {
 
     return new DbLogBasedCdcKafkaPublisher<>(databaseOffsetKafkaStore,
             eventuateKafkaConfigurationProperties.getBootstrapServers(),
-            publishingStrategy);
+            publishingStrategy,
+            eventuateKafkaProducerConfigurationProperties,
+            eventuateKafkaConsumerConfigurationProperties);
   }
 
   @Bean
@@ -129,20 +143,25 @@ public class MessageTableChangesToDestinationsConfiguration {
   @Profile("!EventuatePolling")
   public DatabaseOffsetKafkaStore databaseOffsetKafkaStore(EventuateConfigurationProperties eventuateConfigurationProperties,
                                                            EventuateKafkaConfigurationProperties eventuateKafkaConfigurationProperties,
-                                                           EventuateKafkaProducer eventuateKafkaProducer) {
+                                                           EventuateKafkaProducer eventuateKafkaProducer,
+                                                           EventuateKafkaConsumerConfigurationProperties eventuateKafkaConsumerConfigurationProperties) {
 
     return new DatabaseOffsetKafkaStore(eventuateConfigurationProperties.getDbHistoryTopicName(),
             eventuateConfigurationProperties.getMySqlBinLogClientName(),
             eventuateKafkaProducer,
-            eventuateKafkaConfigurationProperties);
+            eventuateKafkaConfigurationProperties,
+            eventuateKafkaConsumerConfigurationProperties);
   }
 
   @Bean
   @Profile("EventuatePolling")
   public CdcKafkaPublisher<MessageWithDestination> pollingCdcKafkaPublisher(EventuateKafkaConfigurationProperties eventuateKafkaConfigurationProperties,
-          PublishingStrategy<MessageWithDestination> publishingStrategy) {
+                                                                            PublishingStrategy<MessageWithDestination> publishingStrategy,
+                                                                            EventuateKafkaProducerConfigurationProperties eventuateKafkaProducerConfigurationProperties) {
 
-    return new PollingCdcKafkaPublisher<>(eventuateKafkaConfigurationProperties.getBootstrapServers(), publishingStrategy);
+    return new PollingCdcKafkaPublisher<>(eventuateKafkaConfigurationProperties.getBootstrapServers(),
+            publishingStrategy,
+            eventuateKafkaProducerConfigurationProperties);
   }
 
   @Bean
