@@ -10,6 +10,6 @@ docker-compose -f docker-compose-postgres-wal.yml up --build -d
 
 ./wait-for-postgres.sh
 
-./gradlew build
+./gradlew build -x eventuate-tram-status-service:test
 
 docker-compose -f docker-compose-postgres-wal.yml down -v

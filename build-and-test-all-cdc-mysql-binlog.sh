@@ -26,6 +26,7 @@ $DOCKER_COMPOSE up -d
 
 ./wait-for-services.sh $DOCKER_HOST_IP 8099
 
+./gradlew $GRADLE_OPTIONS :eventuate-tram-status-service:cleanTest :eventuate-tram-status-service:test
 ./gradlew $GRADLE_OPTIONS :eventuate-tram-mysql-kafka-integration-test:cleanTest :eventuate-tram-mysql-kafka-integration-test:test
 
 $DOCKER_COMPOSE stop

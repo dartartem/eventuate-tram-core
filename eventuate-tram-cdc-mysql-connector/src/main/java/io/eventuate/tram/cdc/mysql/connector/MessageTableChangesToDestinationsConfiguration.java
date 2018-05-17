@@ -13,6 +13,7 @@ import io.eventuate.local.polling.PollingDao;
 import io.eventuate.local.polling.PollingDataProvider;
 import io.eventuate.local.postgres.wal.PostgresWalClient;
 import io.eventuate.local.postgres.wal.PostgresWalMessageParser;
+import io.eventuate.tram.cdc.status.service.StatusServiceConfiguration;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -23,7 +24,7 @@ import org.springframework.context.annotation.*;
 import javax.sql.DataSource;
 
 @Configuration
-@Import(EventuateDriverConfiguration.class)
+@Import({EventuateDriverConfiguration.class, StatusServiceConfiguration.class})
 public class MessageTableChangesToDestinationsConfiguration {
 
   @Bean

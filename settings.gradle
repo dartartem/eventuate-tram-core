@@ -13,3 +13,5 @@ include 'eventuate-tram-events'
 include 'eventuate-tram-commands'
 include 'eventuate-tram-commands-mysql-kafka-integration-test'
 include "eventuate-tram-test-util"
+
+include "eventuate-tram-status-service"

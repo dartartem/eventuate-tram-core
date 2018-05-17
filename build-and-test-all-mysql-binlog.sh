@@ -10,6 +10,6 @@ docker-compose -f docker-compose-mysql-binlog.yml up --build -d
 
 ./wait-for-mysql.sh
 
-./gradlew $* build
+./gradlew $* build -x eventuate-tram-status-service:test
 
 docker-compose -f docker-compose-mysql-binlog.yml down -v
