@@ -2,6 +2,7 @@ package io.eventuate.tram.cdc.status.service;
 
 import com.google.common.collect.ImmutableMap;
 import io.eventuate.local.common.status.CDCStatus;
+import io.eventuate.local.common.status.StatusData;
 import io.eventuate.tram.messaging.common.MessageImpl;
 import io.eventuate.tram.messaging.producer.MessageProducer;
 import io.eventuate.tram.messaging.producer.jdbc.TramMessageProducerJdbcConfiguration;
@@ -39,22 +40,18 @@ public class StatusServiceTest {
 
   @Test
   public void testStatusRequest() {
+    StatusData statusDTO = request();
 
-    StatusDTO statusDTO = request();
+    Assert.assertEquals(CDCStatus.STARTED, statusDTO.getStatus());
+    Assert.assertEquals(0L, statusDTO.getProcessedEvents());
+    Assert.assertEquals(Collections.emptyList(), statusDTO.getLastProcessedEvents());
 
-    Eventually.eventually(() -> {
-      Assert.assertEquals(CDCStatus.STARTED, statusDTO.getCdcStatus());
-      Assert.assertEquals(0L, statusDTO.getProcessedEvents());
-      Assert.assertEquals(Collections.emptyList(), statusDTO.getLastProcessedEvents());
-
-      messageProducer.send("destination123", new MessageImpl("payload123", new HashMap<>(ImmutableMap.of("ID", "id123"))));
-    });
+    messageProducer.send("destination123", new MessageImpl("payload123", new HashMap<>(ImmutableMap.of("ID", "id123"))));
 
     Eventually.eventually(() -> {
+      StatusData status = request();
 
-      StatusDTO status = request();
-
-      Assert.assertEquals(CDCStatus.PUBLISHING, status.getCdcStatus());
+      Assert.assertEquals(CDCStatus.STARTED, status.getStatus());
       Assert.assertEquals(1L, status.getProcessedEvents());
       Assert.assertEquals(1, status.getLastProcessedEvents().size());
       Assert.assertTrue(status.getLastProcessedEvents().get(0).contains("destination123"));
@@ -62,7 +59,7 @@ public class StatusServiceTest {
     });
   }
 
-  private StatusDTO request() {
+  private StatusData request() {
     return given()
             .contentType("application/json")
             .when()
@@ -71,6 +68,6 @@ public class StatusServiceTest {
             .statusCode(200)
             .extract()
             .body()
-            .as(StatusDTO.class);
+            .as(StatusData.class);
   }
 }

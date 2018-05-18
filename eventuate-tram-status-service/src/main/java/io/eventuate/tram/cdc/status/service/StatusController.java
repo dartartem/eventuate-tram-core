@@ -1,5 +1,6 @@
 package io.eventuate.tram.cdc.status.service;
 
+import io.eventuate.local.common.status.StatusData;
 import io.eventuate.local.common.status.StatusService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,7 +13,7 @@ public class StatusController {
   private StatusService statusService;
 
   @RequestMapping(value = "/status", method = RequestMethod.GET)
-  public StatusDTO getStatus() {
-    return new StatusDTO(statusService.getLastEvents(), statusService.getProcessedEvents(), statusService.getStatus());
+  public StatusData getStatus() {
+    return statusService.getStatusData();
   }
 }
